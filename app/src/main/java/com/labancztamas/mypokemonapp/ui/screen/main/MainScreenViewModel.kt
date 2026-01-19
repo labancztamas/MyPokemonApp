@@ -14,6 +14,7 @@ import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import timber.log.Timber
 
 class MainScreenViewModel(
     private val navigationEmitter: NavigationEmitter,
@@ -49,7 +50,7 @@ class MainScreenViewModel(
         when {
             isError -> MainScreenUiState.Error
             pokemonList == null -> MainScreenUiState.Loading
-            else -> MainScreenUiState.Loaded(
+            else -> MainScreenUiState.Content(
                 inputValues = inputValues,
                 pokemonList = pokemonList
             )
@@ -57,82 +58,113 @@ class MainScreenViewModel(
     }.stateIn(
         scope = viewModelScope,
         started = SharingStarted.WhileSubscribed(5000),
-        initialValue = MainScreenUiState.Loading
+        initialValue = MainScreenUiState.Initial
     )
 
-    init {
-        viewModelScope.launch {
-            initalizeScreen()
+    override fun onAction(action: MainScreenContract.MainScreenAction) {
+        when (action) {
+            is MainScreenContract.MainScreenAction.CatchPokemon -> catchPokemon(
+                pokemon = action.pokemon
+            )
+
+            MainScreenContract.MainScreenAction.GetTypes -> getTypes()
+            MainScreenContract.MainScreenAction.InitializeScreen -> initializeScreen()
+            is MainScreenContract.MainScreenAction.NavigateToProfile -> navigateToProfile(
+                pokemon = action.pokemon
+            )
+
+            is MainScreenContract.MainScreenAction.ReleasePokemon -> releasePokemon(
+                pokemon = action.pokemon
+            )
+
+            is MainScreenContract.MainScreenAction.SetName -> setName(
+                name = action.name
+            )
+
+            is MainScreenContract.MainScreenAction.SetType -> setType(
+                type = action.type
+            )
+
+            is MainScreenContract.MainScreenAction.ToggleCaughtBox -> toggleCaughtBox(
+                enabled = action.enabled
+            )
+
+            MainScreenContract.MainScreenAction.UpdatePokemonList -> updatePokemonList()
         }
     }
 
-    override fun getTypes() {
+    private fun getTypes() {
         viewModelScope.launch {
             pokemonInteractor.getTypesList()
-                .catch { isError.emit(true) }
+                .catch {
+                    Timber.e(it.toString())
+                    isError.emit(true)
+                }
                 .collect {
                     types.emit(it)
                 }
         }
     }
 
-    override fun updatePokemonList() {
+    private fun updatePokemonList() {
         viewModelScope.launch {
             pokemonInteractor.getPokemonListItems(
                 name = nameText.value,
                 type = selectedType.value,
                 isCaught = isCaughtBoxSelected.value,
             )
-                .catch { isError.emit(true) }
+                .catch {
+                    Timber.e(it.toString())
+                    isError.emit(true)
+                }
                 .collect {
                     pokemonList.emit(it)
                 }
         }
     }
 
-    override fun toggleCaughtBox(enabled: Boolean) {
+    private fun toggleCaughtBox(enabled: Boolean) {
         isCaughtBoxSelected.value = enabled
-        updatePokemonList()
     }
 
-    override fun setName(name: String) {
+    private fun setName(name: String) {
         nameText.value = name
-        updatePokemonList()
     }
 
-    override fun setType(type: String) {
+    private fun setType(type: String) {
         selectedType.value = type
-        updatePokemonList()
     }
 
-    override fun catchPokemon(pokemon: PokemonListItem) {
+    private fun catchPokemon(pokemon: PokemonListItem) {
         viewModelScope.launch {
             try {
                 pokemonInteractor.catchPokemon(name = pokemon.name, type = pokemon.type)
-            } catch (_: Exception) {
+            } catch (e: Exception) {
+                Timber.e(e.toString())
                 isError.emit(true)
             }
         }
     }
 
-    override fun releasePokemon(pokemon: PokemonListItem) {
+    private fun releasePokemon(pokemon: PokemonListItem) {
         viewModelScope.launch {
             try {
                 pokemonInteractor.releasePokemon(name = pokemon.name, type = pokemon.type)
-            } catch (_: Exception) {
+            } catch (e: Exception) {
+                Timber.e(e.toString())
                 isError.emit(true)
             }
         }
     }
 
-    override fun navigateToProfile(pokemon: PokemonListItem) {
+    private fun navigateToProfile(pokemon: PokemonListItem) {
         viewModelScope.launch {
             navigationEmitter.navigateTo(Screen.ProfileScreen(pokemon.name))
         }
     }
 
-    override fun initalizeScreen() {
+    private fun initializeScreen() {
         getTypes()
-        updatePokemonList()
+        pokemonList.value = emptyList()
     }
 }

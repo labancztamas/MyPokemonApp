@@ -7,13 +7,17 @@ interface MainScreenContract {
 
     val uiState: StateFlow<MainScreenUiState>
 
-    fun getTypes()
-    fun updatePokemonList()
-    fun toggleCaughtBox(enabled: Boolean)
-    fun setName(name: String)
-    fun setType(type: String)
-    fun catchPokemon(pokemon: PokemonListItem)
-    fun releasePokemon(pokemon: PokemonListItem)
-    fun navigateToProfile(pokemon: PokemonListItem)
-    fun initalizeScreen()
+    fun onAction(action: MainScreenAction)
+
+    sealed interface MainScreenAction {
+        data object GetTypes : MainScreenAction
+        data object UpdatePokemonList : MainScreenAction
+        data class ToggleCaughtBox(val enabled: Boolean) : MainScreenAction
+        data class SetName(val name: String) : MainScreenAction
+        data class SetType(val type: String) : MainScreenAction
+        data class CatchPokemon(val pokemon: PokemonListItem) : MainScreenAction
+        data class ReleasePokemon(val pokemon: PokemonListItem) : MainScreenAction
+        data class NavigateToProfile(val pokemon: PokemonListItem) : MainScreenAction
+        data object InitializeScreen : MainScreenAction
+    }
 }

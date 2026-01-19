@@ -14,7 +14,7 @@ interface PokemonInteractor {
         isCaught: Boolean? = null
     ): Flow<List<PokemonListItem>>
 
-    suspend fun getPokemonDetails(name: String): Flow<PokemonDetails>
+    suspend fun getPokemonDetails(name: String): Flow<PokemonDetails?>
     suspend fun catchPokemon(name: String, type: String)
     suspend fun releasePokemon(name: String, type: String)
 }

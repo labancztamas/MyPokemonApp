@@ -15,6 +15,7 @@ import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -22,26 +23,54 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.onFocusChanged
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.labancztamas.mypokemonapp.ui.preview.MainScreenUiStatePreviewProvider
+import com.labancztamas.mypokemonapp.ui.screen.main.MainScreenContract.MainScreenAction
 import org.koin.androidx.compose.koinViewModel
 
 @Composable
 fun MainScreen(
-    viewModel: MainScreenViewModel = koinViewModel()
+    viewModel: MainScreenContract = koinViewModel<MainScreenViewModel>()
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
+    MainScreenContent(
+        uiState = uiState,
+        onAction = viewModel::onAction
+    )
+}
+
+@Composable
+private fun MainScreenContent(
+    uiState: MainScreenUiState,
+    onAction: (MainScreenAction) -> Unit
+) {
     when (uiState) {
-        MainScreenUiState.Error -> ErrorScreen(viewModel::initalizeScreen)
-        is MainScreenUiState.Loaded -> LoadedScreen(
-            uiState = uiState as MainScreenUiState.Loaded,
-            onTextChanged = viewModel::setName,
-            updateList = viewModel::updatePokemonList,
-            selectType = viewModel::setType,
+        MainScreenUiState.Initial -> InitialScreen(
+            onAction = onAction,
+        )
+
+        is MainScreenUiState.Content -> LoadedScreen(
+            uiState = uiState,
+            onAction = onAction,
         )
 
         MainScreenUiState.Loading -> LoadingScreen()
+        MainScreenUiState.Error -> ErrorScreen(
+            resetScreen = { onAction(MainScreenAction.InitializeScreen) }
+        )
+    }
+}
+
+@Composable
+private fun InitialScreen(
+    onAction: (MainScreenAction) -> Unit
+) {
+    LaunchedEffect(Unit) {
+        onAction(MainScreenAction.InitializeScreen)
     }
 }
 
@@ -73,10 +102,8 @@ private fun ErrorScreen(resetScreen: () -> Unit) {
 
 @Composable
 private fun LoadedScreen(
-    uiState: MainScreenUiState.Loaded,
-    onTextChanged: (String) -> Unit,
-    updateList: () -> Unit,
-    selectType: (String) -> Unit,
+    uiState: MainScreenUiState.Content,
+    onAction: (MainScreenAction) -> Unit,
 ) {
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -85,8 +112,14 @@ private fun LoadedScreen(
     ) {
         TextField(
             value = uiState.inputValues.nameText ?: "",
-            onValueChange = onTextChanged,
-            modifier = Modifier.onFocusChanged { if (!it.isFocused) updateList() }
+            onValueChange = {
+                onAction(MainScreenAction.SetName(it))
+            },
+            modifier = Modifier.onFocusChanged {
+                if (!it.isFocused) {
+                    onAction(MainScreenAction.UpdatePokemonList)
+                }
+            }
         )
 
         if (!(uiState.inputValues.selectableTypes?.types).isNullOrEmpty()) {
@@ -105,10 +138,28 @@ private fun LoadedScreen(
                     for (type in uiState.inputValues.selectableTypes.types)
                         DropdownMenuItem(
                             text = { Text(type) },
-                            onClick = { selectType(type) }
+                            onClick = { onAction(MainScreenAction.SetType(type)) }
                         )
                 }
             }
         }
+
+        Button(
+            onClick = { onAction(MainScreenAction.UpdatePokemonList) }
+        ) {
+            Text("Search")
+        }
     }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun MainScreenPreview(
+    @PreviewParameter(MainScreenUiStatePreviewProvider::class)
+    uiState: MainScreenUiState
+) {
+    MainScreenContent(
+        uiState = uiState,
+        onAction = {}
+    )
 }
