@@ -7,6 +7,7 @@ import com.labancztamas.mypokemonapp.model.PokemonListItem
 import com.labancztamas.mypokemonapp.model.PokemonTypes
 import com.labancztamas.mypokemonapp.navigation.NavigationEmitter
 import com.labancztamas.mypokemonapp.navigation.Screen
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -14,6 +15,7 @@ import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import timber.log.Timber
 
 class MainScreenViewModel(
@@ -67,7 +69,6 @@ class MainScreenViewModel(
                 pokemon = action.pokemon
             )
 
-            MainScreenContract.MainScreenAction.GetTypes -> getTypes()
             MainScreenContract.MainScreenAction.InitializeScreen -> initializeScreen()
             is MainScreenContract.MainScreenAction.NavigateToProfile -> navigateToProfile(
                 pokemon = action.pokemon
@@ -95,31 +96,35 @@ class MainScreenViewModel(
 
     private fun getTypes() {
         viewModelScope.launch {
-            pokemonInteractor.getTypesList()
-                .catch {
-                    Timber.e(it.toString())
-                    isError.emit(true)
-                }
-                .collect {
-                    types.emit(it)
-                }
+            withContext(Dispatchers.IO) {
+                pokemonInteractor.getTypesList()
+                    .catch {
+                        Timber.e(it.toString())
+                        isError.emit(true)
+                    }
+                    .collect {
+                        types.emit(it)
+                    }
+            }
         }
     }
 
     private fun updatePokemonList() {
         viewModelScope.launch {
-            pokemonInteractor.getPokemonListItems(
-                name = nameText.value,
-                type = selectedType.value,
-                isCaught = isCaughtBoxSelected.value,
-            )
-                .catch {
-                    Timber.e(it.toString())
-                    isError.emit(true)
-                }
-                .collect {
-                    pokemonList.emit(it)
-                }
+            withContext(Dispatchers.IO) {
+                pokemonInteractor.getPokemonListItems(
+                    name = nameText.value,
+                    type = selectedType.value,
+                    isCaught = isCaughtBoxSelected.value,
+                )
+                    .catch {
+                        Timber.e(it.toString())
+                        isError.emit(true)
+                    }
+                    .collect {
+                        pokemonList.emit(it)
+                    }
+            }
         }
     }
 
@@ -137,22 +142,26 @@ class MainScreenViewModel(
 
     private fun catchPokemon(pokemon: PokemonListItem) {
         viewModelScope.launch {
-            try {
-                pokemonInteractor.catchPokemon(name = pokemon.name, type = pokemon.type)
-            } catch (e: Exception) {
-                Timber.e(e.toString())
-                isError.emit(true)
+            withContext(Dispatchers.IO) {
+                try {
+                    pokemonInteractor.catchPokemon(name = pokemon.name, type = pokemon.type)
+                } catch (e: Exception) {
+                    Timber.e(e.toString())
+                    isError.emit(true)
+                }
             }
         }
     }
 
     private fun releasePokemon(pokemon: PokemonListItem) {
         viewModelScope.launch {
-            try {
-                pokemonInteractor.releasePokemon(name = pokemon.name, type = pokemon.type)
-            } catch (e: Exception) {
-                Timber.e(e.toString())
-                isError.emit(true)
+            withContext(Dispatchers.IO) {
+                try {
+                    pokemonInteractor.releasePokemon(name = pokemon.name, type = pokemon.type)
+                } catch (e: Exception) {
+                    Timber.e(e.toString())
+                    isError.emit(true)
+                }
             }
         }
     }

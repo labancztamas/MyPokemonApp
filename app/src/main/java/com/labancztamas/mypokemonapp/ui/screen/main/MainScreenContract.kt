@@ -10,7 +10,6 @@ interface MainScreenContract {
     fun onAction(action: MainScreenAction)
 
     sealed interface MainScreenAction {
-        data object GetTypes : MainScreenAction
         data object UpdatePokemonList : MainScreenAction
         data class ToggleCaughtBox(val enabled: Boolean) : MainScreenAction
         data class SetName(val name: String) : MainScreenAction
