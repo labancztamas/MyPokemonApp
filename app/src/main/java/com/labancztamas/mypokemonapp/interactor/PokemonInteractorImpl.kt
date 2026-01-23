@@ -8,12 +8,17 @@ import com.labancztamas.mypokemonapp.model.PokemonTypes
 import com.labancztamas.mypokemonapp.network.api.ApiService
 import io.ktor.http.HttpStatusCode
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.flow
 
 class PokemonInteractorImpl(
     private val apiService: ApiService,
     private val pokemonDao: PokemonDao
 ) : PokemonInteractor {
+
+    override val caughtPokemonsFlow: Flow<List<String>> =
+        pokemonDao.getCaughtPokemonNamesAsFlow()
+
     override suspend fun getTypesList(): Flow<PokemonTypes> =
         flow {
             val response = apiService.getTypes()
@@ -47,15 +52,15 @@ class PokemonInteractorImpl(
                     emptyList()
 
                 isCaught != true && !name.isNullOrEmpty() && type.isNullOrEmpty() -> {
-                    getUncaughtPokemonByName(name)
+                    getUncaughtPokemonByName(name).checkIfCaught()
                 }
 
                 isCaught != true && name.isNullOrEmpty() && !type.isNullOrEmpty() -> {
-                    getUncaughtPokemonsByType(type)
+                    getUncaughtPokemonsByType(type).checkIfCaught()
                 }
 
                 isCaught != true && !name.isNullOrEmpty() && !type.isNullOrEmpty() -> {
-                    getUncaughtPokemonsByNameAndType(name, type)
+                    getUncaughtPokemonsByNameAndType(name, type).checkIfCaught()
                 }
 
                 else -> emptyList()
@@ -190,4 +195,16 @@ class PokemonInteractorImpl(
                 isCaught = true
             )
         }
+
+    private suspend fun List<PokemonListItem>.checkIfCaught(): List<PokemonListItem> {
+        val caughtPokemonNames = caughtPokemonsFlow.firstOrNull() ?: emptyList()
+
+        return this.map {
+            if (caughtPokemonNames.contains(it.name) && !it.isCaught) {
+                it.copy(isCaught = true)
+            } else {
+                it
+            }
+        }
+    }
 }

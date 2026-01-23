@@ -3,7 +3,7 @@ package com.labancztamas.mypokemonapp.activity
 import android.os.Bundle
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import com.labancztamas.mypokemonapp.ui.theme.MyPokemonAppTheme
+import androidx.compose.material3.MaterialTheme
 
 class MainActivity : NavigatorActivity() {
 
@@ -11,7 +11,7 @@ class MainActivity : NavigatorActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
-            MyPokemonAppTheme {
+            MaterialTheme {
                 Navigator()
             }
         }

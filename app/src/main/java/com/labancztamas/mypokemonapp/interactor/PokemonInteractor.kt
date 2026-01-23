@@ -7,6 +7,7 @@ import kotlinx.coroutines.flow.Flow
 
 interface PokemonInteractor {
 
+    val caughtPokemonsFlow: Flow<List<String>>
     suspend fun getTypesList(): Flow<PokemonTypes>
     suspend fun getPokemonListItems(
         name: String? = null,

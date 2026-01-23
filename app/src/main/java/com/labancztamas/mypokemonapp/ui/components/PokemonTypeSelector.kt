@@ -15,6 +15,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -29,7 +30,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.labancztamas.mypokemonapp.R
 import com.labancztamas.mypokemonapp.model.PokemonTypes
-import com.labancztamas.mypokemonapp.ui.theme.MyPokemonAppTheme
 
 @Composable
 fun PokemonTypeSelector(
@@ -108,7 +108,7 @@ fun PokemonTypeSelector(
 @Preview(showBackground = true)
 @Composable
 private fun PokemonTypeSelectorPreview() {
-    MyPokemonAppTheme {
+    MaterialTheme {
         PokemonTypeSelector(
             selectedType = "Fire",
             selectableTypes = PokemonTypes(types = listOf("Fire", "Poison")),

@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -28,6 +29,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
@@ -122,10 +124,12 @@ private fun ContentScreen(
             onAction = onAction
         )
 
-        PokemonResultList(
-            uiState = uiState,
-            onAction = onAction
-        )
+        if (uiState.pokemonList.isNotEmpty()) {
+            PokemonResultList(
+                uiState = uiState,
+                onAction = onAction
+            )
+        }
     }
 }
 
@@ -136,7 +140,7 @@ private fun PokemonTitle() {
         modifier = Modifier
             .fillMaxWidth()
             .wrapContentHeight()
-            .background(Color(0xFFCC3B3B))
+            .background(colorResource(R.color.red))
     ) {
         Image(
             painter = painterResource(R.drawable.pokemon_logo),
@@ -144,7 +148,7 @@ private fun PokemonTitle() {
             contentScale = ContentScale.Fit,
             modifier = Modifier
                 .size(width = 140.dp, height = 120.dp)
-                .background(Color(0xFFCC3B3B))
+                .background(colorResource(R.color.red))
         )
     }
 }
@@ -155,7 +159,7 @@ private fun InputFieldsSection(
     onAction: (MainScreenAction) -> Unit,
 ) {
     Column(
-        verticalArrangement = Arrangement.spacedBy(32.dp),
+        verticalArrangement = Arrangement.spacedBy(24.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = Modifier
             .wrapContentSize()
@@ -218,12 +222,28 @@ private fun PokemonResultList(
     LazyColumn(
         modifier = Modifier
             .fillMaxWidth()
-            .wrapContentHeight()
+            .fillMaxHeight()
             .padding(top = 16.dp)
-            .background(Color(0xFFCDDDEE))
+            .background(colorResource(R.color.light_blue))
     ) {
-        // TODO header of list, live ROOM update of list, profile screen, outsource strings
-        items(items = uiState.pokemonList) { pokemon ->
+        item {
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(40.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(start = 60.dp)
+                    .height(48.dp)
+            ) {
+                Text("Name")
+                Text("Type")
+                Text("Status")
+            }
+        }
+        items(
+            items = uiState.pokemonList,
+            key = { it.name }
+        ) { pokemon ->
             PokemonListElement(
                 item = pokemon,
                 onElementClick = {

@@ -6,5 +6,5 @@ import androidx.compose.runtime.Composable
 fun ProfileScreen(
     pokemonName: String
 ) {
-
+    // TODO profile screen, outsource strings
 }

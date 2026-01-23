@@ -14,15 +14,17 @@ import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.labancztamas.mypokemonapp.R
 import com.labancztamas.mypokemonapp.model.PokemonListItem
-import com.labancztamas.mypokemonapp.ui.theme.MyPokemonAppTheme
 
 @Composable
 fun PokemonListElement(
@@ -51,9 +53,9 @@ fun PokemonListElement(
                 .border(
                     width = 1.dp,
                     color = if (isCaught) {
-                        Color(0xFFFFCB05)
+                        colorResource(R.color.yellow)
                     } else {
-                        Color(0xFF2E6EB5)
+                        colorResource(R.color.blue)
                     },
                     shape = RoundedCornerShape(8.dp)
                 )
@@ -63,7 +65,7 @@ fun PokemonListElement(
         ) {
             Text(
                 text = item.name,
-                color = Color.DarkGray
+                color = Color.DarkGray,
             )
             Text(
                 text = item.type,
@@ -75,7 +77,7 @@ fun PokemonListElement(
                 } else {
                     "-"
                 },
-                color = Color.DarkGray
+                color = Color.DarkGray,
             )
         }
 
@@ -89,9 +91,9 @@ fun PokemonListElement(
             },
             colors = ButtonDefaults.buttonColors(
                 containerColor = if (isCaught) {
-                    Color(0xFFFFCB05)
+                    colorResource(R.color.yellow)
                 } else {
-                    Color(0xFF2E6EB5)
+                    colorResource(R.color.blue)
                 }
             )
         ) {
@@ -109,7 +111,7 @@ fun PokemonListElement(
 @Preview(showBackground = true)
 @Composable
 private fun PokemonListElementPreview() {
-    MyPokemonAppTheme {
+    MaterialTheme {
         PokemonListElement(
             item = PokemonListItem(
                 type = "electric",
