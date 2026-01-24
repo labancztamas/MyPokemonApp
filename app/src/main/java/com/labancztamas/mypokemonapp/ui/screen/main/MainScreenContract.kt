@@ -18,5 +18,7 @@ interface MainScreenContract {
         data class ReleasePokemon(val pokemon: PokemonListItem) : MainScreenAction
         data class NavigateToProfile(val pokemon: PokemonListItem) : MainScreenAction
         data object InitializeScreen : MainScreenAction
+        data object CheckCaughtPokemons : MainScreenAction
+        data object NavigateBack : MainScreenAction
     }
 }

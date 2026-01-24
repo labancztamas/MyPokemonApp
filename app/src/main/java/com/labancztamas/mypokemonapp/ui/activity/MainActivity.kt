@@ -1,9 +1,9 @@
-package com.labancztamas.mypokemonapp.activity
+package com.labancztamas.mypokemonapp.ui.activity
 
 import android.os.Bundle
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.compose.material3.MaterialTheme
+import com.labancztamas.mypokemonapp.ui.components.MyPokemonAppScaffold
 
 class MainActivity : NavigatorActivity() {
 
@@ -11,7 +11,7 @@ class MainActivity : NavigatorActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
-            MaterialTheme {
+            MyPokemonAppScaffold {
                 Navigator()
             }
         }

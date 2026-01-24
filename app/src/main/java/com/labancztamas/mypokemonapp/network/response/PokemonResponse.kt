@@ -7,7 +7,6 @@ import kotlinx.serialization.Serializable
 data class PokemonResponse(
     val abilities: List<Ability>,
     val height: Int,
-    val id: Int,
     val name: String,
     @SerialName("sprites")
     val image: Sprites,
@@ -27,8 +26,18 @@ data class TypeX(
 
 @Serializable
 data class Sprites(
+    val other: Other
+)
+
+@Serializable
+data class Other(
+    val home: Home,
+)
+
+@Serializable
+data class Home(
     @SerialName("front_default")
-    val url: String
+    val imageUrl: String,
 )
 
 @Serializable

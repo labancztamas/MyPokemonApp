@@ -72,6 +72,9 @@ class PokemonInteractorImpl(
     override suspend fun getPokemonDetails(name: String): Flow<PokemonDetails?> =
         flow {
             val response = apiService.getByName(name = name).first
+            val isCaught = pokemonDao.getCaughtPokemonByName(nameOfPokemon = name)
+                .firstOrNull() != null
+
             emit(
                 response?.let {
                     PokemonDetails(
@@ -79,10 +82,11 @@ class PokemonInteractorImpl(
                             .filterNot { it.isHidden }
                             .map { it.ability.name },
                         height = response.height,
-                        id = response.id,
                         name = response.name,
-                        imageUrl = response.image.url,
-                        weight = response.weight
+                        imageUrl = response.image.other.home.imageUrl,
+                        weight = response.weight,
+                        type = response.types.first().type.name,
+                        isCaught = isCaught,
                     )
                 }
             )

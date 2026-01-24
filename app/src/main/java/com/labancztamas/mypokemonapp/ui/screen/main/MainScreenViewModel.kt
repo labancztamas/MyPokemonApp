@@ -1,12 +1,12 @@
 package com.labancztamas.mypokemonapp.ui.screen.main
 
-import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.labancztamas.mypokemonapp.interactor.PokemonInteractor
 import com.labancztamas.mypokemonapp.model.PokemonListItem
 import com.labancztamas.mypokemonapp.model.PokemonTypes
 import com.labancztamas.mypokemonapp.navigation.NavigationEmitter
 import com.labancztamas.mypokemonapp.navigation.Screen
+import com.labancztamas.mypokemonapp.utils.BaseViewModel
 import com.labancztamas.mypokemonapp.utils.STATEFLOW_SUBSCRIPTION_TIME
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -21,9 +21,11 @@ import kotlinx.coroutines.withContext
 import timber.log.Timber
 
 class MainScreenViewModel(
-    private val navigationEmitter: NavigationEmitter,
+    navigationEmitter: NavigationEmitter,
     private val pokemonInteractor: PokemonInteractor
-) : ViewModel(), MainScreenContract {
+) : MainScreenContract, BaseViewModel(
+    navigationEmitter = navigationEmitter,
+) {
 
     private val types = MutableStateFlow<PokemonTypes?>(null)
     private val nameText = MutableStateFlow("")
@@ -93,6 +95,8 @@ class MainScreenViewModel(
             )
 
             MainScreenContract.MainScreenAction.UpdatePokemonList -> updatePokemonList()
+            MainScreenContract.MainScreenAction.CheckCaughtPokemons -> checkCaughtPokemons()
+            MainScreenContract.MainScreenAction.NavigateBack -> navigateBack()
         }
     }
 
@@ -149,7 +153,7 @@ class MainScreenViewModel(
                         name = pokemon.name,
                         type = pokemon.type
                     )
-                    checkCaughtPokemons()
+                    updateCaughtStateForPokemonList()
                 } catch (e: Exception) {
                     Timber.e(e.toString())
                     isError.emit(true)
@@ -166,7 +170,7 @@ class MainScreenViewModel(
                         name = pokemon.name,
                         type = pokemon.type
                     )
-                    checkCaughtPokemons()
+                    updateCaughtStateForPokemonList()
                 } catch (e: Exception) {
                     Timber.e(e.toString())
                     isError.emit(true)
@@ -176,9 +180,11 @@ class MainScreenViewModel(
     }
 
     private fun navigateToProfile(pokemon: PokemonListItem) {
-        viewModelScope.launch {
-            navigationEmitter.navigateTo(Screen.ProfileScreen(pokemon.name))
-        }
+        navigateTo(
+            Screen.ProfileScreen(
+                pokemonName = pokemon.name
+            )
+        )
     }
 
     private fun initializeScreen() {
@@ -187,7 +193,15 @@ class MainScreenViewModel(
         isError.value = false
     }
 
-    private suspend fun checkCaughtPokemons() {
+    private fun checkCaughtPokemons() {
+        viewModelScope.launch {
+            withContext(Dispatchers.IO) {
+                updateCaughtStateForPokemonList()
+            }
+        }
+    }
+
+    private suspend fun updateCaughtStateForPokemonList() {
         val pokemonsList = pokemonList.value
         val caughtPokemonNames = pokemonInteractor.caughtPokemonsFlow.firstOrNull()
             ?: emptyList()
