@@ -8,7 +8,6 @@ import com.labancztamas.mypokemonapp.navigation.NavigationEmitter
 import com.labancztamas.mypokemonapp.navigation.Screen
 import com.labancztamas.mypokemonapp.utils.BaseViewModel
 import com.labancztamas.mypokemonapp.utils.STATEFLOW_SUBSCRIPTION_TIME
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -16,8 +15,6 @@ import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.stateIn
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import timber.log.Timber
 
 class MainScreenViewModel(
@@ -101,34 +98,30 @@ class MainScreenViewModel(
     }
 
     private fun getTypes() {
-        viewModelScope.launch {
-            withContext(Dispatchers.IO) {
-                pokemonInteractor.getTypesList()
-                    .catch {
-                        Timber.e(it.toString())
-                        isError.emit(true)
-                    }
-                    .collect {
-                        types.emit(it)
-                    }
-            }
+        launch {
+            pokemonInteractor.getTypesList()
+                .catch {
+                    Timber.e(it.toString())
+                    isError.emit(true)
+                }
+                .collect {
+                    types.emit(it)
+                }
         }
     }
 
     private fun updatePokemonList() {
-        viewModelScope.launch {
-            withContext(Dispatchers.IO) {
-                pokemonInteractor.getPokemonListItems(
-                    name = nameText.value,
-                    type = selectedType.value,
-                    isCaught = isCaughtBoxSelected.value,
-                ).catch {
-                    Timber.e(it.toString())
-                    isError.emit(true)
-                }.collect { pokemons ->
-                    val distinctPokemons = pokemons.distinctBy { it.name }
-                    pokemonList.emit(distinctPokemons)
-                }
+        launch {
+            pokemonInteractor.getPokemonListItems(
+                name = nameText.value,
+                type = selectedType.value,
+                isCaught = isCaughtBoxSelected.value,
+            ).catch {
+                Timber.e(it.toString())
+                isError.emit(true)
+            }.collect { pokemons ->
+                val distinctPokemons = pokemons.distinctBy { it.name }
+                pokemonList.emit(distinctPokemons)
             }
         }
     }
@@ -146,35 +139,31 @@ class MainScreenViewModel(
     }
 
     private fun catchPokemon(pokemon: PokemonListItem) {
-        viewModelScope.launch {
-            withContext(Dispatchers.IO) {
-                try {
-                    pokemonInteractor.catchPokemon(
-                        name = pokemon.name,
-                        type = pokemon.type
-                    )
-                    updateCaughtStateForPokemonList()
-                } catch (e: Exception) {
-                    Timber.e(e.toString())
-                    isError.emit(true)
-                }
+        launch {
+            try {
+                pokemonInteractor.catchPokemon(
+                    name = pokemon.name,
+                    type = pokemon.type
+                )
+                updateCaughtStateForPokemonList()
+            } catch (e: Exception) {
+                Timber.e(e.toString())
+                isError.emit(true)
             }
         }
     }
 
     private fun releasePokemon(pokemon: PokemonListItem) {
-        viewModelScope.launch {
-            withContext(Dispatchers.IO) {
-                try {
-                    pokemonInteractor.releasePokemon(
-                        name = pokemon.name,
-                        type = pokemon.type
-                    )
-                    updateCaughtStateForPokemonList()
-                } catch (e: Exception) {
-                    Timber.e(e.toString())
-                    isError.emit(true)
-                }
+        launch {
+            try {
+                pokemonInteractor.releasePokemon(
+                    name = pokemon.name,
+                    type = pokemon.type
+                )
+                updateCaughtStateForPokemonList()
+            } catch (e: Exception) {
+                Timber.e(e.toString())
+                isError.emit(true)
             }
         }
     }
@@ -194,10 +183,8 @@ class MainScreenViewModel(
     }
 
     private fun checkCaughtPokemons() {
-        viewModelScope.launch {
-            withContext(Dispatchers.IO) {
-                updateCaughtStateForPokemonList()
-            }
+        launch {
+            updateCaughtStateForPokemonList()
         }
     }
 

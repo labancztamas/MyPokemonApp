@@ -7,15 +7,13 @@ import com.labancztamas.mypokemonapp.navigation.NavigationEmitter
 import com.labancztamas.mypokemonapp.ui.screen.profile.ProfileScreenContract.ProfileScreenAction
 import com.labancztamas.mypokemonapp.utils.BaseViewModel
 import com.labancztamas.mypokemonapp.utils.STATEFLOW_SUBSCRIPTION_TIME
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.stateIn
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import timber.log.Timber
 
 class ProfileScreenViewModel(
@@ -61,18 +59,16 @@ class ProfileScreenViewModel(
     private fun fetchPokemonDetails() {
         val name = pokemonName
         if (!name.isNullOrEmpty()) {
-            viewModelScope.launch {
-                withContext(Dispatchers.IO) {
-                    pokemonInteractor.getPokemonDetails(name = name)
-                        .catch {
-                            Timber.e(it.toString())
-                            isError.emit(true)
-                        }
-                        .collect {
-                            pokemonDetails.emit(it)
-                            Timber.d("Pokemon details: ${it.toString()}")
-                        }
-                }
+            launch {
+                pokemonInteractor.getPokemonDetails(name = name)
+                    .catch {
+                        Timber.e(it.toString())
+                        isError.emit(true)
+                    }
+                    .collect {
+                        pokemonDetails.emit(it)
+                        Timber.d("Pokemon details: ${it.toString()}")
+                    }
             }
         } else {
             Timber.e("Empty pokemon name!")
@@ -83,19 +79,16 @@ class ProfileScreenViewModel(
     private fun catchPokemon() {
         val pokemon = pokemonDetails.value
         if (pokemon != null) {
-            viewModelScope.launch {
-                withContext(Dispatchers.IO) {
-                    try {
-                        pokemonInteractor.catchPokemon(
-                            name = pokemon.name,
-                            type = pokemon.type,
-                        )
-                        // TODO only check the room db change, don't call api
-                        fetchPokemonDetails()
-                    } catch (e: Exception) {
-                        Timber.e(e.toString())
-                        isError.emit(true)
-                    }
+            launch {
+                try {
+                    pokemonInteractor.catchPokemon(
+                        name = pokemon.name,
+                        type = pokemon.type,
+                    )
+                    updateCaughtStateForPokemon()
+                } catch (e: Exception) {
+                    Timber.e(e.toString())
+                    isError.emit(true)
                 }
             }
         }
@@ -104,20 +97,40 @@ class ProfileScreenViewModel(
     private fun releasePokemon() {
         val pokemon = pokemonDetails.value
         if (pokemon != null) {
-            viewModelScope.launch {
-                withContext(Dispatchers.IO) {
-                    try {
-                        pokemonInteractor.releasePokemon(
-                            name = pokemon.name,
-                            type = pokemon.type
-                        )
-                        // TODO only check the room db change, don't call api
-                        fetchPokemonDetails()
-                    } catch (e: Exception) {
-                        Timber.e(e.toString())
-                        isError.emit(true)
-                    }
+            launch {
+                try {
+                    pokemonInteractor.releasePokemon(
+                        name = pokemon.name,
+                        type = pokemon.type
+                    )
+                    updateCaughtStateForPokemon()
+                } catch (e: Exception) {
+                    Timber.e(e.toString())
+                    isError.emit(true)
                 }
+            }
+        }
+    }
+
+    private suspend fun updateCaughtStateForPokemon() {
+        val pokemon = pokemonDetails.value
+        val caughtPokemonNames = pokemonInteractor.caughtPokemonsFlow.firstOrNull()
+            ?: emptyList()
+        var changed = false
+
+        if (pokemon != null) {
+            val updatedPokemon =
+                if (caughtPokemonNames.contains(pokemon.name) && !pokemon.isCaught) {
+                    changed = true
+                    pokemon.copy(isCaught = true)
+                } else if (!caughtPokemonNames.contains(pokemon.name) && pokemon.isCaught) {
+                    changed = true
+                    pokemon.copy(isCaught = false)
+                } else {
+                    pokemon
+                }
+            if (changed) {
+                pokemonDetails.emit(updatedPokemon)
             }
         }
     }

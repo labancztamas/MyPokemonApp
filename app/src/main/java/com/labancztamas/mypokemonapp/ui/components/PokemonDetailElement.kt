@@ -23,11 +23,10 @@ fun PokemonDetailElement(
     values: List<String>,
     indexInList: Int,
 ) {
-    // TODO make these colors lighter
     val backgroundColor = if (indexInList % 2 == 0) {
-        colorResource(R.color.blue)
+        colorResource(R.color.mid_blue)
     } else {
-        colorResource(R.color.yellow)
+        colorResource(R.color.supernova)
     }
 
     Row(
@@ -36,7 +35,7 @@ fun PokemonDetailElement(
         modifier = Modifier
             .background(backgroundColor)
             .fillMaxWidth()
-            .heightIn(min = 32.dp)
+            .heightIn(min = 48.dp)
     ) {
         Text(
             text = key,

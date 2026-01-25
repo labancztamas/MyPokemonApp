@@ -2,6 +2,7 @@ package com.labancztamas.mypokemonapp.ui.screen.main
 
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -149,7 +150,15 @@ private fun InputFieldsSection(
         Row(
             horizontalArrangement = Arrangement.Start,
             verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier
+                .fillMaxWidth()
+                .clickable {
+                    onAction(
+                        MainScreenAction.ToggleCaughtBox(
+                            !uiState.inputValues.isCaughtCheckBoxSelected
+                        )
+                    )
+                }
         ) {
             Checkbox(
                 checked = uiState.inputValues.isCaughtCheckBoxSelected,

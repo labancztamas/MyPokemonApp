@@ -4,4 +4,6 @@
     <color name="yellow">#FFFFCB05</color>
     <color name="blue">#FF2E6EB5</color>
     <color name="light_blue">#FFCDDDEE</color>
+    <color name="mid_blue">#3C2E6EB5</color>
+    <color name="supernova">#3DFFCB05</color>
 </resources>
