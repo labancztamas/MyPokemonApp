@@ -25,6 +25,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.colorResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
@@ -130,7 +131,7 @@ private fun InputFieldsSection(
             },
             placeholder = {
                 Text(
-                    text = "Search by name..",
+                    text = stringResource(R.string.name_input_placeholder),
                     color = Color.LightGray,
                 )
             },
@@ -167,7 +168,7 @@ private fun InputFieldsSection(
                 }
             )
 
-            Text("Only show caught pokemon")
+            Text(stringResource(R.string.caught_checkbox_text))
         }
 
 
@@ -177,7 +178,7 @@ private fun InputFieldsSection(
                 containerColor = colorResource(R.color.red)
             )
         ) {
-            Text("Search")
+            Text(stringResource(R.string.search_button_text))
         }
     }
 }
@@ -203,9 +204,9 @@ private fun PokemonResultList(
                     .padding(start = 60.dp)
                     .height(48.dp)
             ) {
-                Text("Name")
-                Text("Type")
-                Text("Status")
+                Text(stringResource(R.string.pokemon_list_header_name))
+                Text(stringResource(R.string.pokemon_list_header_type))
+                Text(stringResource(R.string.pokemon_list_header_status))
             }
         }
         items(

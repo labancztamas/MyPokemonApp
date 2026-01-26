@@ -26,6 +26,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.labancztamas.mypokemonapp.R
@@ -43,7 +44,9 @@ fun PokemonTypeSelector(
     val (selectedTypeText, selectedTypeColor) =
         with(selectedType) {
             if (this.isNullOrEmpty()) {
-                "Select type.." to Color.LightGray
+                stringResource(
+                    R.string.type_selector_placeholder
+                ) to Color.LightGray
             } else {
                 this to Color.Black
             }
@@ -52,7 +55,7 @@ fun PokemonTypeSelector(
     Column(
         modifier = modifier
     ) {
-        Text("Pokemon Types")
+        Text(stringResource(R.string.type_selector_title))
 
         Spacer(
             modifier = Modifier.height(8.dp)
@@ -83,7 +86,9 @@ fun PokemonTypeSelector(
                 )
                 Icon(
                     painter = painterResource(R.drawable.arrow_drop_down_24),
-                    contentDescription = "Dropdown",
+                    contentDescription = stringResource(
+                        R.string.type_selector_icon_content_description
+                    ),
                     modifier = Modifier.padding(end = 8.dp)
                 )
             }

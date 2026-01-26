@@ -10,8 +10,10 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.labancztamas.mypokemonapp.R
 
 @Composable
 fun ErrorScreen(resetScreen: () -> Unit) {
@@ -20,10 +22,10 @@ fun ErrorScreen(resetScreen: () -> Unit) {
         verticalArrangement = Arrangement.Center,
         modifier = Modifier.fillMaxSize()
     ) {
-        Text("An error has occurred.")
+        Text(stringResource(R.string.general_error_message))
         Spacer(modifier = Modifier.height(20.dp))
         Button(onClick = resetScreen) {
-            Text("Reload")
+            Text(stringResource(R.string.general_error_retry_button_text))
         }
     }
 }

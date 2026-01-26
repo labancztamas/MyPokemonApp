@@ -21,6 +21,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.colorResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.labancztamas.mypokemonapp.R
@@ -73,9 +74,9 @@ fun PokemonListElement(
             )
             Text(
                 text = if (isCaught) {
-                    "Caught"
+                    stringResource(R.string.pokemon_detail_status_caught)
                 } else {
-                    "-"
+                    stringResource(R.string.pokemon_detail_status_not_caught)
                 },
                 color = Color.DarkGray,
             )
@@ -99,9 +100,9 @@ fun PokemonListElement(
         ) {
             Text(
                 text = if (isCaught) {
-                    "Release"
+                    stringResource(R.string.release_pokemon_button_text)
                 } else {
-                    "Catch"
+                    stringResource(R.string.catch_pokemon_button_text)
                 }
             )
         }

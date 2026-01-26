@@ -1,3 +1,37 @@
 <resources>
     <string name="app_name">MyPokemonApp</string>
+
+    <!-- Error -->
+    <string name="general_error_message">An error has occurred.</string>
+    <string name="general_error_retry_button_text">Reload</string>
+
+    <!-- Content description -->
+    <string name="top_app_bar_image_content_description">Pokemon title</string>
+    <string name="pokemon_details_image_content_description">Pokemon image</string>
+    <string name="type_selector_icon_content_description">Dropdown</string>
+
+    <!-- Main Screen -->
+    <string name="type_selector_placeholder">Select type..</string>
+    <string name="type_selector_title">Pokemon Types</string>
+    <string name="name_input_placeholder">Search by name..</string>
+    <string name="caught_checkbox_text">Only show caught pokemon</string>
+    <string name="search_button_text">Search</string>
+    <string name="pokemon_list_header_name">Name</string>
+    <string name="pokemon_list_header_type">Type</string>
+    <string name="pokemon_list_header_status">Status</string>
+
+    <!-- Profile Screen -->
+    <string name="pokemon_details_key_name">Name</string>
+    <string name="pokemon_details_key_weight">Weight</string>
+    <string name="pokemon_details_key_height">Height</string>
+    <string name="pokemon_details_key_abilities">Abilities</string>
+    <string name="pokemon_details_key_status">Status</string>
+    <string name="pokemon_detail_height_suffix">" m"</string>
+    <string name="pokemon_detail_weight_suffix">" kg"</string>
+
+    <!-- General texts -->
+    <string name="pokemon_detail_status_caught">Caught</string>
+    <string name="pokemon_detail_status_not_caught">-</string>
+    <string name="release_pokemon_button_text">Release</string>
+    <string name="catch_pokemon_button_text">Catch</string>
 </resources>

@@ -21,6 +21,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.colorResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
@@ -125,7 +126,9 @@ private fun PokemonImage(
 ) {
     AsyncImage(
         model = pokemonDetails.imageUrl,
-        contentDescription = "Pokemon image",
+        contentDescription = stringResource(
+            R.string.pokemon_details_image_content_description
+        ),
         contentScale = ContentScale.Fit,
         modifier = Modifier
             .fillMaxWidth()
@@ -142,41 +145,46 @@ private fun PokemonImage(
     )
 }
 
-// TODO outsource strings
 @Composable
 private fun PokemonDetailsList(pokemonDetails: PokemonDetails) {
     Column {
         PokemonDetailElement(
-            key = "Name",
+            key = stringResource(R.string.pokemon_details_key_name),
             values = listOf(pokemonDetails.name),
             indexInList = 0
         )
 
         PokemonDetailElement(
-            key = "Weight",
-            values = listOf(pokemonDetails.weight.toString() + " kg"),
+            key = stringResource(R.string.pokemon_details_key_weight),
+            values = listOf(
+                pokemonDetails.weight.toString() +
+                        stringResource(R.string.pokemon_detail_weight_suffix)
+            ),
             indexInList = 1
         )
 
         PokemonDetailElement(
-            key = "Height",
-            values = listOf(pokemonDetails.height.toString() + " m"),
+            key = stringResource(R.string.pokemon_details_key_height),
+            values = listOf(
+                pokemonDetails.height.toString() +
+                        stringResource(R.string.pokemon_detail_height_suffix)
+            ),
             indexInList = 2
         )
 
         PokemonDetailElement(
-            key = "Abilities",
+            key = stringResource(R.string.pokemon_details_key_abilities),
             values = pokemonDetails.notHiddenAbilities,
             indexInList = 3
         )
 
         PokemonDetailElement(
-            key = "Status",
+            key = stringResource(R.string.pokemon_details_key_status),
             values = listOf(
                 if (pokemonDetails.isCaught) {
-                    "Caught"
+                    stringResource(R.string.pokemon_detail_status_caught)
                 } else {
-                    "-"
+                    stringResource(R.string.pokemon_detail_status_not_caught)
                 }
             ),
             indexInList = 4
@@ -210,9 +218,9 @@ private fun CatchOrReleaseButton(
     ) {
         Text(
             text = if (isCaught) {
-                "Release"
+                stringResource(R.string.release_pokemon_button_text)
             } else {
-                "Catch"
+                stringResource(R.string.catch_pokemon_button_text)
             },
         )
     }

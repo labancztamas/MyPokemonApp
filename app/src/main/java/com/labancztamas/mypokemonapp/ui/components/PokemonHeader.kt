@@ -13,6 +13,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.labancztamas.mypokemonapp.R
@@ -28,7 +29,9 @@ fun PokemonHeader() {
     ) {
         Image(
             painter = painterResource(R.drawable.pokemon_logo),
-            contentDescription = "Pokemon title",
+            contentDescription = stringResource(
+                R.string.top_app_bar_image_content_description
+            ),
             contentScale = ContentScale.Fit,
             modifier = Modifier
                 .size(width = 140.dp, height = 120.dp)
