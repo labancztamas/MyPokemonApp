@@ -4,8 +4,10 @@ import com.labancztamas.mypokemonapp.model.PokemonListItem
 import com.labancztamas.mypokemonapp.model.PokemonTypes
 
 sealed interface MainScreenUiState {
+
+    data object Initial : MainScreenUiState
     data object Loading : MainScreenUiState
-    data class Loaded(
+    data class Content(
         val inputValues: MainScreenInputValues,
         val pokemonList: List<PokemonListItem>
     ) : MainScreenUiState

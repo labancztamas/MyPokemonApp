@@ -22,8 +22,17 @@ android {
     }
 
     buildTypes {
-        release {
+        debug {
+            isDebuggable = true
             isMinifyEnabled = false
+            isShrinkResources = false
+            applicationIdSuffix = ".dev"
+            versionNameSuffix = "-dev"
+        }
+        release {
+            isDebuggable = false
+            isMinifyEnabled = true
+            isShrinkResources = true
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
@@ -36,6 +45,7 @@ android {
     }
     buildFeatures {
         compose = true
+        buildConfig = true
     }
 }
 
@@ -53,16 +63,17 @@ dependencies {
     implementation(libs.koin.androidx.compose)
     implementation(libs.koin.android)
     implementation(libs.ktor.client.okhttp)
+    implementation(libs.ktor.content.negotiator)
+    implementation(libs.ktor.serialization.json)
     implementation(libs.ktor.client.core)
+    implementation(libs.ktor.client.logging)
     implementation(libs.kotlinx.coroutines.core)
     implementation(libs.kotlinx.coroutines.android)
     implementation(libs.room.runtime)
+    implementation(libs.timber)
+    implementation(libs.coil)
+    implementation(libs.coil.network)
     ksp(libs.room.compiler)
-    testImplementation(libs.junit)
-    androidTestImplementation(libs.androidx.junit)
-    androidTestImplementation(libs.androidx.espresso.core)
-    androidTestImplementation(platform(libs.androidx.compose.bom))
-    androidTestImplementation(libs.androidx.compose.ui.test.junit4)
     debugImplementation(libs.androidx.compose.ui.tooling)
     debugImplementation(libs.androidx.compose.ui.test.manifest)
 }

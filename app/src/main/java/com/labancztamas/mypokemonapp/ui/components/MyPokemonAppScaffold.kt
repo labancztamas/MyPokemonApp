@@ -1,0 +1,32 @@
+package com.labancztamas.mypokemonapp.ui.components
+
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.tooling.preview.Preview
+
+@Composable
+fun MyPokemonAppScaffold(content: @Composable () -> Unit) {
+    MaterialTheme {
+        Scaffold(
+            topBar = {
+                PokemonHeader()
+            }
+        ) { padding ->
+            Column(
+                modifier = Modifier.padding(padding)
+            ) {
+                content()
+            }
+        }
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun MyPokemonAppScaffoldPreview() {
+    MyPokemonAppScaffold {}
+}

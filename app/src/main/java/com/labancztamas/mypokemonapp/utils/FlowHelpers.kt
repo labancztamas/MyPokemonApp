@@ -11,6 +11,8 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.withContext
 
+const val STATEFLOW_SUBSCRIPTION_TIME = 5000L
+
 @SuppressLint("ComposableNaming")
 @Composable
 fun <T> Flow<T>.collectWithLifecycle(

@@ -1,4 +1,4 @@
-package com.labancztamas.mypokemonapp.activity
+package com.labancztamas.mypokemonapp.ui.activity
 
 import androidx.activity.ComponentActivity
 import androidx.compose.runtime.Composable
@@ -38,7 +38,14 @@ open class NavigatorActivity : ComponentActivity() {
                     navController.navigate(navEvent.screen)
                 }
 
-                is NavigationEvent.Back -> navController.popBackStack()
+                is NavigationEvent.Back -> {
+                    if (navController.previousBackStackEntry != null) {
+                        navController.popBackStack()
+                    } else {
+                        this@NavigatorActivity.finish()
+                    }
+
+                }
             }
         }
     }

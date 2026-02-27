@@ -1,24 +1,28 @@
 package com.labancztamas.mypokemonapp.ui.screen.main
 
-import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.labancztamas.mypokemonapp.interactor.PokemonInteractor
 import com.labancztamas.mypokemonapp.model.PokemonListItem
 import com.labancztamas.mypokemonapp.model.PokemonTypes
 import com.labancztamas.mypokemonapp.navigation.NavigationEmitter
 import com.labancztamas.mypokemonapp.navigation.Screen
+import com.labancztamas.mypokemonapp.utils.BaseViewModel
+import com.labancztamas.mypokemonapp.utils.STATEFLOW_SUBSCRIPTION_TIME
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.stateIn
-import kotlinx.coroutines.launch
+import timber.log.Timber
 
 class MainScreenViewModel(
-    private val navigationEmitter: NavigationEmitter,
+    navigationEmitter: NavigationEmitter,
     private val pokemonInteractor: PokemonInteractor
-) : ViewModel(), MainScreenContract {
+) : MainScreenContract, BaseViewModel(
+    navigationEmitter = navigationEmitter,
+) {
 
     private val types = MutableStateFlow<PokemonTypes?>(null)
     private val nameText = MutableStateFlow("")
@@ -49,90 +53,162 @@ class MainScreenViewModel(
         when {
             isError -> MainScreenUiState.Error
             pokemonList == null -> MainScreenUiState.Loading
-            else -> MainScreenUiState.Loaded(
+            else -> MainScreenUiState.Content(
                 inputValues = inputValues,
                 pokemonList = pokemonList
             )
         }
     }.stateIn(
         scope = viewModelScope,
-        started = SharingStarted.WhileSubscribed(5000),
-        initialValue = MainScreenUiState.Loading
+        started = SharingStarted.WhileSubscribed(STATEFLOW_SUBSCRIPTION_TIME),
+        initialValue = MainScreenUiState.Initial
     )
 
-    init {
-        viewModelScope.launch {
-            initalizeScreen()
+    override fun onAction(action: MainScreenContract.MainScreenAction) {
+        when (action) {
+            is MainScreenContract.MainScreenAction.CatchPokemon -> catchPokemon(
+                pokemon = action.pokemon
+            )
+
+            MainScreenContract.MainScreenAction.InitializeScreen -> initializeScreen()
+            is MainScreenContract.MainScreenAction.NavigateToProfile -> navigateToProfile(
+                pokemon = action.pokemon
+            )
+
+            is MainScreenContract.MainScreenAction.ReleasePokemon -> releasePokemon(
+                pokemon = action.pokemon
+            )
+
+            is MainScreenContract.MainScreenAction.SetName -> setName(
+                name = action.name
+            )
+
+            is MainScreenContract.MainScreenAction.SetType -> setType(
+                type = action.type
+            )
+
+            is MainScreenContract.MainScreenAction.ToggleCaughtBox -> toggleCaughtBox(
+                enabled = action.enabled
+            )
+
+            MainScreenContract.MainScreenAction.UpdatePokemonList -> updatePokemonList()
+            MainScreenContract.MainScreenAction.CheckCaughtPokemons -> checkCaughtPokemons()
+            MainScreenContract.MainScreenAction.NavigateBack -> navigateBack()
         }
     }
 
-    override fun getTypes() {
-        viewModelScope.launch {
+    private fun getTypes() {
+        launch {
             pokemonInteractor.getTypesList()
-                .catch { isError.emit(true) }
+                .catch {
+                    Timber.e(it.toString())
+                    isError.emit(true)
+                }
                 .collect {
                     types.emit(it)
                 }
         }
     }
 
-    override fun updatePokemonList() {
-        viewModelScope.launch {
+    private fun updatePokemonList() {
+        launch {
             pokemonInteractor.getPokemonListItems(
                 name = nameText.value,
                 type = selectedType.value,
                 isCaught = isCaughtBoxSelected.value,
-            )
-                .catch { isError.emit(true) }
-                .collect {
-                    pokemonList.emit(it)
-                }
+            ).catch {
+                Timber.e(it.toString())
+                isError.emit(true)
+            }.collect { pokemons ->
+                val distinctPokemons = pokemons.distinctBy { it.name }
+                pokemonList.emit(distinctPokemons)
+            }
         }
     }
 
-    override fun toggleCaughtBox(enabled: Boolean) {
+    private fun toggleCaughtBox(enabled: Boolean) {
         isCaughtBoxSelected.value = enabled
-        updatePokemonList()
     }
 
-    override fun setName(name: String) {
+    private fun setName(name: String) {
         nameText.value = name
-        updatePokemonList()
     }
 
-    override fun setType(type: String) {
+    private fun setType(type: String) {
         selectedType.value = type
-        updatePokemonList()
     }
 
-    override fun catchPokemon(pokemon: PokemonListItem) {
-        viewModelScope.launch {
+    private fun catchPokemon(pokemon: PokemonListItem) {
+        launch {
             try {
-                pokemonInteractor.catchPokemon(name = pokemon.name, type = pokemon.type)
-            } catch (_: Exception) {
+                pokemonInteractor.catchPokemon(
+                    name = pokemon.name,
+                    type = pokemon.type
+                )
+                updateCaughtStateForPokemonList()
+            } catch (e: Exception) {
+                Timber.e(e.toString())
                 isError.emit(true)
             }
         }
     }
 
-    override fun releasePokemon(pokemon: PokemonListItem) {
-        viewModelScope.launch {
+    private fun releasePokemon(pokemon: PokemonListItem) {
+        launch {
             try {
-                pokemonInteractor.releasePokemon(name = pokemon.name, type = pokemon.type)
-            } catch (_: Exception) {
+                pokemonInteractor.releasePokemon(
+                    name = pokemon.name,
+                    type = pokemon.type
+                )
+                updateCaughtStateForPokemonList()
+            } catch (e: Exception) {
+                Timber.e(e.toString())
                 isError.emit(true)
             }
         }
     }
 
-    override fun navigateToProfile(pokemon: PokemonListItem) {
-        viewModelScope.launch {
-            navigationEmitter.navigateTo(Screen.ProfileScreen(pokemon.name))
-        }
+    private fun navigateToProfile(pokemon: PokemonListItem) {
+        navigateTo(
+            Screen.ProfileScreen(
+                pokemonName = pokemon.name
+            )
+        )
     }
 
-    override fun initalizeScreen() {
+    private fun initializeScreen() {
         getTypes()
-        updatePokemonList()
+        pokemonList.value = emptyList()
+        isError.value = false
+    }
+
+    private fun checkCaughtPokemons() {
+        launch {
+            updateCaughtStateForPokemonList()
+        }
+    }
+
+    private suspend fun updateCaughtStateForPokemonList() {
+        val pokemonsList = pokemonList.value
+        val caughtPokemonNames = pokemonInteractor.caughtPokemonsFlow.firstOrNull()
+            ?: emptyList()
+        var changed = false
+
+        if (!pokemonsList.isNullOrEmpty()) {
+            val updatedList = pokemonsList.map {
+                if (caughtPokemonNames.contains(it.name) && !it.isCaught) {
+                    changed = true
+                    it.copy(isCaught = true)
+                } else if (!caughtPokemonNames.contains(it.name) && it.isCaught) {
+                    changed = true
+                    it.copy(isCaught = false)
+                } else {
+                    it
+                }
+            }
+            if (changed) {
+                pokemonList.emit(updatedList)
+            }
+        }
     }
 }

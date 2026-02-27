@@ -1,10 +1,10 @@
 package com.labancztamas.mypokemonapp.di
 
-import androidx.room.Room
+import com.labancztamas.mypokemonapp.db.DatabaseBuilder
 import com.labancztamas.mypokemonapp.db.PokemonDao
-import com.labancztamas.mypokemonapp.db.PokemonDatabase
 import com.labancztamas.mypokemonapp.interactor.PokemonInteractor
 import com.labancztamas.mypokemonapp.interactor.PokemonInteractorImpl
+import com.labancztamas.mypokemonapp.network.AppHttpClient
 import com.labancztamas.mypokemonapp.network.api.ApiService
 import com.labancztamas.mypokemonapp.network.api.ApiServiceImpl
 import io.ktor.client.HttpClient
@@ -18,15 +18,8 @@ val applicationModule = module {
 
     singleOf(::PokemonInteractorImpl) { bind<PokemonInteractor>() }
 
-    single<PokemonDao> {
-        Room.databaseBuilder(
-            androidContext(),
-            PokemonDatabase::class.java, "pokemons"
-        )
-            .build()
-            .pokemonDao()
-    }
+    single<PokemonDao> { DatabaseBuilder(context = androidContext()).getDao() }
 
-    single<HttpClient> { HttpClient() }
+    single<HttpClient> { AppHttpClient().client }
     singleOf(::ApiServiceImpl) { bind<ApiService>() }
 }
