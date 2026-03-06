@@ -39,6 +39,8 @@ fun PokemonTypeSelector(
     onTyeSelected: (String) -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    // TODO add a clearing possibility
+
     var expanded by remember { mutableStateOf(false) }
 
     val (selectedTypeText, selectedTypeColor) =

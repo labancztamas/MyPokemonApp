@@ -7,6 +7,6 @@ import com.labancztamas.mypokemonapp.network.response.TypeResponse
 interface ApiService {
 
     suspend fun getTypes(): TypeResponse
-    suspend fun getByName(name: String): Pair<PokemonResponse?, HttpResponseCode>
-    suspend fun getByType(type: String): Pair<PokemonByTypeResponse?, HttpResponseCode>
+    suspend fun getByName(name: String): PokemonResponse
+    suspend fun getByType(type: String): PokemonByTypeResponse
 }
