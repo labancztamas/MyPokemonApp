@@ -2,17 +2,20 @@ package com.labancztamas.mypokemonapp.ui.screen.profile
 
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.border
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -26,7 +29,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import coil3.compose.AsyncImage
+import coil3.compose.SubcomposeAsyncImage
 import com.labancztamas.mypokemonapp.R
 import com.labancztamas.mypokemonapp.model.PokemonDetails
 import com.labancztamas.mypokemonapp.ui.components.ErrorScreen
@@ -124,11 +127,19 @@ private fun ContentScreen(
 private fun PokemonImage(
     pokemonDetails: PokemonDetails
 ) {
-    AsyncImage(
+    SubcomposeAsyncImage(
         model = pokemonDetails.imageUrl,
         contentDescription = stringResource(
             R.string.pokemon_details_image_content_description
         ),
+        loading = {
+            Box(
+                modifier = Modifier.size(184.dp),
+                contentAlignment = Alignment.Center
+            ) {
+                CircularProgressIndicator()
+            }
+        },
         contentScale = ContentScale.Fit,
         modifier = Modifier
             .fillMaxWidth()

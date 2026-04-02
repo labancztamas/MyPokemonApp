@@ -1,9 +1,9 @@
 package com.labancztamas.mypokemonapp.ui.screen.profile
 
 import androidx.lifecycle.viewModelScope
-import com.labancztamas.mypokemonapp.interactor.PokemonInteractor
 import com.labancztamas.mypokemonapp.model.PokemonDetails
 import com.labancztamas.mypokemonapp.navigation.NavigationEmitter
+import com.labancztamas.mypokemonapp.repository.PokemonRepository
 import com.labancztamas.mypokemonapp.ui.screen.profile.ProfileScreenContract.ProfileScreenAction
 import com.labancztamas.mypokemonapp.utils.BaseViewModel
 import com.labancztamas.mypokemonapp.utils.STATEFLOW_SUBSCRIPTION_TIME
@@ -18,7 +18,7 @@ import timber.log.Timber
 
 class ProfileScreenViewModel(
     navigationEmitter: NavigationEmitter,
-    private val pokemonInteractor: PokemonInteractor
+    private val pokemonRepository: PokemonRepository
 ) : ProfileScreenContract, BaseViewModel(
     navigationEmitter = navigationEmitter,
 ) {
@@ -60,14 +60,14 @@ class ProfileScreenViewModel(
         val name = pokemonName
         if (!name.isNullOrEmpty()) {
             launch {
-                pokemonInteractor.getPokemonDetails(name = name)
+                pokemonRepository.getPokemonDetails(name = name)
                     .catch {
                         Timber.e(it.toString())
                         isError.emit(true)
                     }
                     .collect {
                         pokemonDetails.emit(it)
-                        Timber.d("Pokemon details: ${it.toString()}")
+                        Timber.d("Pokemon details: $it")
                     }
             }
         } else {
@@ -81,7 +81,7 @@ class ProfileScreenViewModel(
         if (pokemon != null) {
             launch {
                 try {
-                    pokemonInteractor.catchPokemon(
+                    pokemonRepository.catchPokemon(
                         name = pokemon.name,
                         type = pokemon.type,
                     )
@@ -99,7 +99,7 @@ class ProfileScreenViewModel(
         if (pokemon != null) {
             launch {
                 try {
-                    pokemonInteractor.releasePokemon(
+                    pokemonRepository.releasePokemon(
                         name = pokemon.name,
                         type = pokemon.type
                     )
@@ -114,7 +114,7 @@ class ProfileScreenViewModel(
 
     private suspend fun updateCaughtStateForPokemon() {
         val pokemon = pokemonDetails.value
-        val caughtPokemonNames = pokemonInteractor.caughtPokemonsFlow.firstOrNull()
+        val caughtPokemonNames = pokemonRepository.caughtPokemonsFlow.firstOrNull()
             ?: emptyList()
         var changed = false
 

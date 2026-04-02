@@ -1,11 +1,12 @@
 package com.labancztamas.mypokemonapp.ui.screen.main
 
 import androidx.lifecycle.viewModelScope
-import com.labancztamas.mypokemonapp.interactor.PokemonInteractor
 import com.labancztamas.mypokemonapp.model.PokemonListItem
 import com.labancztamas.mypokemonapp.model.PokemonTypes
 import com.labancztamas.mypokemonapp.navigation.NavigationEmitter
 import com.labancztamas.mypokemonapp.navigation.Screen
+import com.labancztamas.mypokemonapp.repository.PokemonRepository
+import com.labancztamas.mypokemonapp.utils.AppException
 import com.labancztamas.mypokemonapp.utils.BaseViewModel
 import com.labancztamas.mypokemonapp.utils.STATEFLOW_SUBSCRIPTION_TIME
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -19,7 +20,7 @@ import timber.log.Timber
 
 class MainScreenViewModel(
     navigationEmitter: NavigationEmitter,
-    private val pokemonInteractor: PokemonInteractor
+    private val pokemonRepository: PokemonRepository
 ) : MainScreenContract, BaseViewModel(
     navigationEmitter = navigationEmitter,
 ) {
@@ -52,7 +53,9 @@ class MainScreenViewModel(
     ) { inputValues, pokemonList, isError ->
         when {
             isError -> MainScreenUiState.Error
-            pokemonList == null -> MainScreenUiState.Loading
+            pokemonList == null || inputValues.selectableTypes == null
+                -> MainScreenUiState.Loading
+
             else -> MainScreenUiState.Content(
                 inputValues = inputValues,
                 pokemonList = pokemonList
@@ -99,7 +102,7 @@ class MainScreenViewModel(
 
     private fun getTypes() {
         launch {
-            pokemonInteractor.getTypesList()
+            pokemonRepository.getTypesList()
                 .catch {
                     Timber.e(it.toString())
                     isError.emit(true)
@@ -112,13 +115,17 @@ class MainScreenViewModel(
 
     private fun updatePokemonList() {
         launch {
-            pokemonInteractor.getPokemonListItems(
+            pokemonRepository.getPokemonListItems(
                 name = nameText.value,
                 type = selectedType.value,
                 isCaught = isCaughtBoxSelected.value,
-            ).catch {
-                Timber.e(it.toString())
-                isError.emit(true)
+            ).catch { exception ->
+                if (exception is AppException.NotFoundException) {
+                    pokemonList.emit(emptyList())
+                } else {
+                    Timber.e(exception.toString())
+                    isError.emit(true)
+                }
             }.collect { pokemons ->
                 val distinctPokemons = pokemons.distinctBy { it.name }
                 pokemonList.emit(distinctPokemons)
@@ -141,7 +148,7 @@ class MainScreenViewModel(
     private fun catchPokemon(pokemon: PokemonListItem) {
         launch {
             try {
-                pokemonInteractor.catchPokemon(
+                pokemonRepository.catchPokemon(
                     name = pokemon.name,
                     type = pokemon.type
                 )
@@ -156,7 +163,7 @@ class MainScreenViewModel(
     private fun releasePokemon(pokemon: PokemonListItem) {
         launch {
             try {
-                pokemonInteractor.releasePokemon(
+                pokemonRepository.releasePokemon(
                     name = pokemon.name,
                     type = pokemon.type
                 )
@@ -190,7 +197,7 @@ class MainScreenViewModel(
 
     private suspend fun updateCaughtStateForPokemonList() {
         val pokemonsList = pokemonList.value
-        val caughtPokemonNames = pokemonInteractor.caughtPokemonsFlow.firstOrNull()
+        val caughtPokemonNames = pokemonRepository.caughtPokemonsFlow.firstOrNull()
             ?: emptyList()
         var changed = false
 

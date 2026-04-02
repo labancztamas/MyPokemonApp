@@ -1,11 +1,11 @@
-package com.labancztamas.mypokemonapp.interactor
+package com.labancztamas.mypokemonapp.repository
 
 import com.labancztamas.mypokemonapp.model.PokemonDetails
 import com.labancztamas.mypokemonapp.model.PokemonListItem
 import com.labancztamas.mypokemonapp.model.PokemonTypes
 import kotlinx.coroutines.flow.Flow
 
-interface PokemonInteractor {
+interface PokemonRepository {
 
     val caughtPokemonsFlow: Flow<List<String>>
     suspend fun getTypesList(): Flow<PokemonTypes>
@@ -15,7 +15,7 @@ interface PokemonInteractor {
         isCaught: Boolean? = null
     ): Flow<List<PokemonListItem>>
 
-    suspend fun getPokemonDetails(name: String): Flow<PokemonDetails?>
+    suspend fun getPokemonDetails(name: String): Flow<PokemonDetails>
     suspend fun catchPokemon(name: String, type: String)
     suspend fun releasePokemon(name: String, type: String)
 }
