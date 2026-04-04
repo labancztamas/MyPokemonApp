@@ -59,7 +59,7 @@ class ProfileScreenViewModel(
     private fun fetchPokemonDetails() {
         val name = pokemonName
         if (!name.isNullOrEmpty()) {
-            launch {
+            launchInViewModelScope {
                 pokemonRepository.getPokemonDetails(name = name)
                     .catch {
                         Timber.e(it.toString())
@@ -79,7 +79,7 @@ class ProfileScreenViewModel(
     private fun catchPokemon() {
         val pokemon = pokemonDetails.value
         if (pokemon != null) {
-            launch {
+            launchInViewModelScope {
                 try {
                     pokemonRepository.catchPokemon(
                         name = pokemon.name,
@@ -97,7 +97,7 @@ class ProfileScreenViewModel(
     private fun releasePokemon() {
         val pokemon = pokemonDetails.value
         if (pokemon != null) {
-            launch {
+            launchInViewModelScope {
                 try {
                     pokemonRepository.releasePokemon(
                         name = pokemon.name,

@@ -101,7 +101,7 @@ class MainScreenViewModel(
     }
 
     private fun getTypes() {
-        launch {
+        launchInViewModelScope {
             pokemonRepository.getTypesList()
                 .catch {
                     Timber.e(it.toString())
@@ -114,7 +114,7 @@ class MainScreenViewModel(
     }
 
     private fun updatePokemonList() {
-        launch {
+        launchInViewModelScope {
             pokemonRepository.getPokemonListItems(
                 name = nameText.value,
                 type = selectedType.value,
@@ -146,7 +146,8 @@ class MainScreenViewModel(
     }
 
     private fun catchPokemon(pokemon: PokemonListItem) {
-        launch {
+        launchInViewModelScope {
+            // TODO these should return a Flow<Unit> and use Flow.catch for error handling
             try {
                 pokemonRepository.catchPokemon(
                     name = pokemon.name,
@@ -161,7 +162,7 @@ class MainScreenViewModel(
     }
 
     private fun releasePokemon(pokemon: PokemonListItem) {
-        launch {
+        launchInViewModelScope {
             try {
                 pokemonRepository.releasePokemon(
                     name = pokemon.name,
@@ -190,7 +191,7 @@ class MainScreenViewModel(
     }
 
     private fun checkCaughtPokemons() {
-        launch {
+        launchInViewModelScope {
             updateCaughtStateForPokemonList()
         }
     }

@@ -13,7 +13,7 @@ open class BaseViewModel(
     private val navigationEmitter: NavigationEmitter,
 ) : ViewModel() {
 
-    fun launch(
+    fun launchInViewModelScope(
         dispatcher: CoroutineDispatcher = Dispatchers.IO,
         block: suspend () -> Unit,
     ) {
